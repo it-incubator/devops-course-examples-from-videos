@@ -12,6 +12,7 @@ export class AppController {
 
   @Get()
   getTasks() {
-    return [{id: 1}, {id: 2}]
+    console.log('request tasks');
+    return [{id: 1}, {id: 2}, {id: 3}]
   }
 }

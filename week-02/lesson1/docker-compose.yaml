@@ -1,0 +1,10 @@
+name: week-2-cluster
+
+services:
+  # main backend
+  backend:
+    build: ./backend
+    environment:
+      PORT: 3003
+    ports:
+      - "8090:3003"
