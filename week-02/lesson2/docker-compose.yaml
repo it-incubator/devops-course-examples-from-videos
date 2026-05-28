@@ -1,0 +1,20 @@
+name: week-2-cluster
+
+services:
+  # main backend
+  backend:
+    build: ./backend
+    environment:
+      PORT: ${PORT}
+    ports:
+      - "${HOST_PORT}:${PORT}"
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        BUILD_MODE: ${BUILD_MODE}
+        VITE_NAME: ${VITE_NAME}
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
