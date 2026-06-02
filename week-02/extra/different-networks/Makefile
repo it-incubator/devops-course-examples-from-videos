@@ -1,4 +1,10 @@
-.PHONY: check check-1-2 check-2-1 check-2-3 check-3-2 check-1-3 check-3-1
+.PHONY: up down check check-1-2 check-2-1 check-2-3 check-3-2 check-1-3 check-3-1
+
+up:
+	docker compose up -d --build
+
+down:
+	docker compose down
 
 check: check-1-2 check-2-1 check-2-3 check-3-2 check-1-3 check-3-1
 
