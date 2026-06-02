@@ -1,0 +1,20 @@
+services:
+  service1:
+    build: ./service1
+    networks:
+      - net-1-2
+
+  service2:
+    build: ./service2
+    networks:
+      - net-1-2
+      - net-2-3
+
+  service3:
+    build: ./service3
+    networks:
+      - net-2-3
+
+networks:
+  net-1-2:
+  net-2-3:
