@@ -1,0 +1,13 @@
+name: week-2-cluster-dev
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+    # или
+    #  - ./frontend:/app
+    #  - /app/node_modules

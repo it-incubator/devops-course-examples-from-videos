@@ -1,0 +1,82 @@
+name: week-2-cluster
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data         # ← данные БД
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - internal                          # ← только internal
+    # ports убрали: БД больше не светится наружу
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin           # ← настройки pgAdmin
+    networks:
+      - internal                          # должен видеть db
+    depends_on:
+      - db
+
+  backend:
+    build: ./backend
+    environment:
+      PORT: ${PORT}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    ports:
+      - "${HOST_PORT}:${PORT}"
+    healthcheck:
+      test:
+        [ "CMD-SHELL", "wget -qO- http://localhost:$$PORT/api/health | grep -q '\"status\":\"ok\"'" ]
+      interval: 5s
+      timeout: 1s
+      retries: 3
+      start_period: 10s
+    networks:
+      - internal                          # видит db
+      - public                            # и виден фронту
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        BUILD_MODE: ${BUILD_MODE}
+        VITE_NAME: ${VITE_NAME}
+    ports:
+      - "8080:80"
+    networks:
+      - public                            # ← только public, до db маршрута нет
+    depends_on:
+      backend:
+        condition: service_healthy
+
+networks:
+  internal:
+  public:
+
+volumes:
+  pgdata:
+  pgadmin-data:
